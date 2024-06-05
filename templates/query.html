@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+<head>
+    <title>Query Files</title>
+</head>
+<body>
+<h1>List of Files</h1>
+<form method="post" action="/query">
+  <input type="text" name="name" placeholder="Enter name">
+  <input type="number" name="salary" placeholder="Enter salary less than">
+  <input type="submit" value="Query">
+</form>
+<ul>
+  {% for blob in blobs %}
+    <li>{{ blob }}</li>
+  {% endfor %}
+</ul>
+<a href="/">Go Back</a>
+</body>
+</html>
