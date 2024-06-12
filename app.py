@@ -2,8 +2,10 @@ from flask import Flask, request, render_template
 import pymssql
 import pandas as pd
 from datetime import datetime
-
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///people.db'
+app.config['SECRET_KEY'] = 'your_secret_key'
+db = SQLAlchemy(app)
 
 def get_db_connection():
     # 请将以下数据库连接信息修改为你的实际信息
