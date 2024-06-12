@@ -1,43 +1,125 @@
-import os
+from flask import Flask, request, render_template
+import pymssql
 import pandas as pd
-
-from flask import (Flask, redirect, render_template, request,
-                   send_from_directory, url_for)
+import math
 
 app = Flask(__name__)
 
+def get_db_connection():
+    # 请将以下数据库连接信息修改为你的实际信息
+    conn = pymssql.connect(
+        host='hongshuo1.database.windows.net',
+        user='hongshuo',
+        password='Ligengxi456',
+        database='cloud'
+    )
+    return conn
 
 @app.route('/')
 def index():
-   print('Request for index page received')
-   return render_template('index.html')
+    return render_template('index.html')
 
-@app.route('/assignment1')
-def assignment1():
-    data_file_path = os.path.join(app.root_path, 'static', 'data', 'people.csv')
-    data = pd.read_csv(data_file_path)
-    print('Request for assignment1 page received')
-    print(data)
-    print("----")
-    print(list(data.values.tolist()))
-    return render_template('assignment1.html', table_content=list(data.values.tolist()), titles=data.columns.values)
+@app.route('/upload', methods=['POST'])
+def upload():
+    file = request.files['file']
+    if file:
+        data = pd.read_csv(file)
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        for _, row in data.iterrows():
+            cursor.execute(f"""
+                INSERT INTO ass2.earthquakes (time, latitude, longitude, depth, mag, magType, nst, gap, dmin, rms, net, id, updated, place, type, horizontalError, depthError, magError, magNst, status, locationSource, magSource) 
+                VALUES ('{row['time']}', {row['latitude']}, {row['longitude']}, {row['depth']}, {row['mag']}, '{row['magType']}', {row['nst']}, {row['gap']}, {row['dmin']}, {row['rms']}', '{row['net']}', '{row['id']}', '{row['updated']}', '{row['place']}', '{row['type']}', {row['horizontalError']}, {row['depthError']}, {row['magError']}, {row['magNst']}', '{row['status']}', '{row['locationSource']}', '{row['magSource']}')
+            """)
+        conn.commit()
+        conn.close()
+        return 'Data uploaded successfully'
+    return 'Failed to upload data'
 
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
+@app.route('/query', methods=['GET'])
+def query():
+    mag = request.args.get('mag')
+    conn = get_db_connection()
+    cursor = conn.cursor(as_dict=True)
+    cursor.execute(f"SELECT * FROM ass2.earthquakes WHERE mag > {mag}")
+    rows = cursor.fetchall()
+    conn.close()
+    return render_template('query.html', rows=rows)
 
-@app.route('/hello', methods=['POST'])
-def hello():
-   name = request.form.get('name')
+@app.route('/count_mag_5', methods=['GET'])
+def count_mag_5():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) as count FROM ass2.earthquakes WHERE mag > 5.0")
+    result = cursor.fetchone()
+    conn.close()
+    return f"Earthquakes with magnitude > 5.0: {result[0]}"
 
-   if name:
-       print('Request for hello page received with name=%s' % name)
-       return render_template('hello.html', name = name)
-   else:
-       print('Request for hello page received with no name or blank name -- redirecting')
-       return redirect(url_for('index'))
+@app.route('/range_query', methods=['GET'])
+def range_query():
+    mag_min = float(request.args.get('mag_min'))
+    mag_max = float(request.args.get('mag_max'))
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    
+    conn = get_db_connection()
+    cursor = conn.cursor(as_dict=True)
+    query = f"SELECT * FROM ass2.earthquakes WHERE mag BETWEEN {mag_min} AND {mag_max}"
+    if start_date:
+        query += f" AND time >= '{start_date}'"
+    if end_date:
+        query += f" AND time <= '{end_date}'"
+    
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    conn.close()
+    return render_template('query.html', rows=rows)
 
+def haversine(lat1, lon1, lat2, lon2):
+    R = 6371  # Earth radius in kilometers
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    delta_phi = math.radians(lat2 - lat1)
+    delta_lambda = math.radians(lon2 - lon1)
+    a = math.sin(delta_phi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2) ** 2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    distance = R * c
+    return distance
+
+@app.route('/near_location', methods=['GET'])
+def near_location():
+    lat = float(request.args.get('lat'))
+    lon = float(request.args.get('lon'))
+    distance_km = float(request.args.get('distance_km'))
+    
+    conn = get_db_connection()
+    cursor = conn.cursor(as_dict=True)
+    
+    cursor.execute("SELECT * FROM ass2.earthquakes")
+    all_earthquakes = cursor.fetchall()
+    conn.close()
+
+    nearby_earthquakes = []
+    for quake in all_earthquakes:
+        dist = haversine(lat, lon, quake['latitude'], quake['longitude'])
+        if dist <= distance_km:
+            quake['distance'] = dist
+            nearby_earthquakes.append(quake)
+    
+    return render_template('query.html', rows=nearby_earthquakes)
+
+@app.route('/night_quakes', methods=['GET'])
+def night_quakes():
+    conn = get_db_connection()
+    cursor = conn.cursor(as_dict=True)
+    query = """
+        SELECT * FROM ass2.earthquakes 
+        WHERE mag > 4.0 AND (DATEPART(hour, time) >= 18 OR DATEPART(hour, time) <= 6)
+    """
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    conn.close()
+    return render_template('query.html', rows=rows)
 
 if __name__ == '__main__':
-   app.run()
+    app.run(debug=True)

@@ -1,61 +1,80 @@
-<!doctype html>
-<head>
-    <title>Hello Azure - Python Quickstart</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-</head>
+<!DOCTYPE html>
 <html>
-   <body>
-     <main>
-        <div class="px-4 py-3 my-2 text-center">
-            <img class="d-block mx-auto mb-4" src="{{ url_for('static', filename='images/azure-icon.svg') }}" alt="Azure Logo" width="192" height="192"/>
-            <!-- <img  src="/docs/5.1/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57"> -->
-            <h1 class="display-6 fw-bold text-primary">Welcome to Azure</h1>            
-          </div>
-        <form method="post" action="{{url_for('hello')}}">
-            <div class="col-md-6 mx-auto text-center">
-                <label for="name" class="form-label fw-bold fs-5">Could you please tell me your name?</label>
+<head>
+    <title>Upload and Query Earthquake Data</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5">Upload Earthquake Data</h1>
+        <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data" class="mb-5">
+            <div class="form-group">
+                <input type="file" class="form-control-file" name="file" accept=".csv">
+            </div>
+            <button type="submit" class="btn btn-primary">Upload</button>
+        </form>
 
-                <!-- <p class="lead mb-2">Could you please tell me your name?</p> -->
-                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center align-items-center my-1">
-                    <input type="text" class="form-control" id="name" name="name" style="max-width: 256px;">
-                  </div>            
-                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center my-2">
-                  <button type="submit" class="btn btn-primary btn-lg px-4 gap-3">Say Hello</button>
-                </div>            
+        <h1>Query Earthquake Data</h1>
+        <form action="{{ url_for('query') }}" method="get" class="mb-5">
+            <div class="form-group">
+                <label for="mag">Magnitude greater than:</label>
+                <input type="text" class="form-control" id="mag" name="mag">
+            </div>
+            <button type="submit" class="btn btn-primary">Query</button>
+        </form>
+
+        <h1>Other Queries</h1>
+        <form action="{{ url_for('count_mag_5') }}" method="get" class="mb-3">
+            <button type="submit" class="btn btn-primary">Count Earthquakes with Magnitude > 5.0</button>
+        </form>
+
+        <form action="{{ url_for('range_query') }}" method="get" class="mb-3">
+            <div class="form-row">
+                <div class="form-group col-md-2">
+                    <label for="mag_min">Magnitude min:</label>
+                    <input type="text" class="form-control" id="mag_min" name="mag_min">
+                </div>
+                <div class="form-group col-md-2">
+                    <label for="mag_max">Magnitude max:</label>
+                    <input type="text" class="form-control" id="mag_max" name="mag_max">
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="start_date">Start date (YYYY-MM-DD):</label>
+                    <input type="text" class="form-control" id="start_date" name="start_date">
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="end_date">End date (YYYY-MM-DD):</label>
+                    <input type="text" class="form-control" id="end_date" name="end_date">
+                </div>
+                <div class="form-group col-md-2 align-self-end">
+                    <button type="submit" class="btn btn-primary">Query by Range</button>
+                </div>
             </div>
         </form>
 
-        <table class="table">
-          <thead class="thead-light">
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">First</th>
-              <th scope="col">Last</th>
-              <th scope="col">Handle</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">1</th>
-              <td>Mark</td>
-              <td>Otto</td>
-              <td>@mdo</td>
-            </tr>
-            <tr>
-              <th scope="row">2</th>
-              <td>Jacob</td>
-              <td>Thornton</td>
-              <td>@fat</td>
-            </tr>
-            <tr>
-              <th scope="row">3</th>
-              <td>Larry</td>
-              <td>the Bird</td>
-              <td>@twitter</td>
-            </tr>
-          </tbody>
-        </table>
-     </main>      
-   </body>
+        <form action="{{ url_for('near_location') }}" method="get" class="mb-3">
+            <div class="form-row">
+                <div class="form-group col-md-2">
+                    <label for="lat">Latitude:</label>
+                    <input type="text" class="form-control" id="lat" name="lat">
+                </div>
+                <div class="form-group col-md-2">
+                    <label for="lon">Longitude:</label>
+                    <input type="text" class="form-control" id="lon" name="lon">
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="distance_km">Distance (km):</label>
+                    <input type="text" class="form-control" id="distance_km" name="distance_km">
+                </div>
+                <div class="form-group col-md-2 align-self-end">
+                    <button type="submit" class="btn btn-primary">Find Earthquakes Near Location</button>
+                </div>
+            </div>
+        </form>
+
+        <form action="{{ url_for('night_quakes') }}" method="get" class="mb-3">
+            <button type="submit" class="btn btn-primary">Find Large Earthquakes at Night</button>
+        </form>
+    </div>
+</body>
 </html>
