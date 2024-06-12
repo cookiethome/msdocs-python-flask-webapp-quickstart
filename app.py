@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template
 import pymssql
 import pandas as pd
-import math
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -35,7 +35,7 @@ def upload():
         conn.close()
         return 'Data uploaded successfully'
     return 'Failed to upload data'
-
+ #dsafag
 @app.route('/query', methods=['GET'])
 def query():
     mag = request.args.get('mag')
@@ -75,17 +75,6 @@ def range_query():
     conn.close()
     return render_template('query.html', rows=rows)
 
-def haversine(lat1, lon1, lat2, lon2):
-    R = 6371  # Earth radius in kilometers
-    phi1 = math.radians(lat1)
-    phi2 = math.radians(lat2)
-    delta_phi = math.radians(lat2 - lat1)
-    delta_lambda = math.radians(lon2 - lon1)
-    a = math.sin(delta_phi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2) ** 2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    distance = R * c
-    return distance
-
 @app.route('/near_location', methods=['GET'])
 def near_location():
     lat = float(request.args.get('lat'))
@@ -95,18 +84,16 @@ def near_location():
     conn = get_db_connection()
     cursor = conn.cursor(as_dict=True)
     
-    cursor.execute("SELECT * FROM ass2.earthquakes")
-    all_earthquakes = cursor.fetchall()
+    query = f"""
+        SELECT *, 
+            (6371 * acos(cos(radians({lat})) * cos(radians(latitude)) * cos(radians(longitude) - radians({lon})) + sin(radians({lat})) * sin(radians(latitude)))) AS distance 
+        FROM ass2.earthquakes 
+        HAVING distance < {distance_km}
+    """
+    cursor.execute(query)
+    rows = cursor.fetchall()
     conn.close()
-
-    nearby_earthquakes = []
-    for quake in all_earthquakes:
-        dist = haversine(lat, lon, quake['latitude'], quake['longitude'])
-        if dist <= distance_km:
-            quake['distance'] = dist
-            nearby_earthquakes.append(quake)
-    
-    return render_template('query.html', rows=nearby_earthquakes)
+    return render_template('query.html', rows=rows)
 
 @app.route('/night_quakes', methods=['GET'])
 def night_quakes():
