@@ -1,80 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Upload and Query Earthquake Data</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Upload Earthquake Data</title>
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-5">Upload Earthquake Data</h1>
-        <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data" class="mb-5">
-            <div class="form-group">
-                <input type="file" class="form-control-file" name="file" accept=".csv">
-            </div>
-            <button type="submit" class="btn btn-primary">Upload</button>
-        </form>
-
-        <h1>Query Earthquake Data</h1>
-        <form action="{{ url_for('query') }}" method="get" class="mb-5">
-            <div class="form-group">
-                <label for="mag">Magnitude greater than:</label>
-                <input type="text" class="form-control" id="mag" name="mag">
-            </div>
-            <button type="submit" class="btn btn-primary">Query</button>
-        </form>
-
-        <h1>Other Queries</h1>
-        <form action="{{ url_for('count_mag_5') }}" method="get" class="mb-3">
-            <button type="submit" class="btn btn-primary">Count Earthquakes with Magnitude > 5.0</button>
-        </form>
-
-        <form action="{{ url_for('range_query') }}" method="get" class="mb-3">
-            <div class="form-row">
-                <div class="form-group col-md-2">
-                    <label for="mag_min">Magnitude min:</label>
-                    <input type="text" class="form-control" id="mag_min" name="mag_min">
-                </div>
-                <div class="form-group col-md-2">
-                    <label for="mag_max">Magnitude max:</label>
-                    <input type="text" class="form-control" id="mag_max" name="mag_max">
-                </div>
-                <div class="form-group col-md-3">
-                    <label for="start_date">Start date (YYYY-MM-DD):</label>
-                    <input type="text" class="form-control" id="start_date" name="start_date">
-                </div>
-                <div class="form-group col-md-3">
-                    <label for="end_date">End date (YYYY-MM-DD):</label>
-                    <input type="text" class="form-control" id="end_date" name="end_date">
-                </div>
-                <div class="form-group col-md-2 align-self-end">
-                    <button type="submit" class="btn btn-primary">Query by Range</button>
-                </div>
-            </div>
-        </form>
-
-        <form action="{{ url_for('near_location') }}" method="get" class="mb-3">
-            <div class="form-row">
-                <div class="form-group col-md-2">
-                    <label for="lat">Latitude:</label>
-                    <input type="text" class="form-control" id="lat" name="lat">
-                </div>
-                <div class="form-group col-md-2">
-                    <label for="lon">Longitude:</label>
-                    <input type="text" class="form-control" id="lon" name="lon">
-                </div>
-                <div class="form-group col-md-3">
-                    <label for="distance_km">Distance (km):</label>
-                    <input type="text" class="form-control" id="distance_km" name="distance_km">
-                </div>
-                <div class="form-group col-md-2 align-self-end">
-                    <button type="submit" class="btn btn-primary">Find Earthquakes Near Location</button>
-                </div>
-            </div>
-        </form>
-
-        <form action="{{ url_for('night_quakes') }}" method="get" class="mb-3">
-            <button type="submit" class="btn btn-primary">Find Large Earthquakes at Night</button>
-        </form>
-    </div>
+    <h1>Upload Earthquake Data</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".csv">
+        <input type="submit" value="Upload">
+    </form>
+    <h1>Query Earthquake Data</h1>
+    <form action="/query" method="get">
+        <label for="mag">Magnitude greater than:</label>
+        <input type="text" id="mag" name="mag">
+        <input type="submit" value="Query">
+    </form>
 </body>
 </html>

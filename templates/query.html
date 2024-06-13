@@ -2,37 +2,28 @@
 <html>
 <head>
     <title>Earthquake Query Results</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="container mt-5">
-        <h1>Earthquake Query Results</h1>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Time</th>
-                    <th>Latitude</th>
-                    <th>Longitude</th>
-                    <th>Depth</th>
-                    <th>Magnitude</th>
-                    <th>Magnitude Type</th>
-                    <th>Place</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in rows %}
-                <tr>
-                    <td>{{ row.time }}</td>
-                    <td>{{ row.latitude }}</td>
-                    <td>{{ row.longitude }}</td>
-                    <td>{{ row.depth }}</td>
-                    <td>{{ row.mag }}</td>
-                    <td>{{ row.magType }}</td>
-                    <td>{{ row.place }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <h1>Earthquake Query Results</h1>
+    <table border="1">
+        <tr>
+            <th>Time</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
+            <th>Depth</th>
+            <th>Magnitude</th>
+            <th>Place</th>
+        </tr>
+        {% for row in rows %}
+        <tr>
+            <td>{{ row.time }}</td>
+            <td>{{ row.latitude }}</td>
+            <td>{{ row.longitude }}</td>
+            <td>{{ row.depth }}</td>
+            <td>{{ row.mag }}</td>
+            <td>{{ row.place }}</td>
+        </tr>
+        {% endfor %}
+    </table>
 </body>
 </html>
